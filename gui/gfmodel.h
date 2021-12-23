@@ -2,6 +2,7 @@
 #define GFMODEL_H
 
 #include <QAbstractItemModel>
+#include <QFont>
 
 extern "C" {
 #include "../gf.h"
@@ -17,6 +18,7 @@ public:
 private:
     size_t (*op)(GField *f, size_t i, size_t j);
     GField *field;
+    QFont font;
 
 
     // QAbstractItemModel interface

@@ -61,6 +61,7 @@ GFieldInitStatus gfield_init(GField *f, size_t n, GfPoly *irreducible);
 size_t gfield_add(GField *f, size_t i, size_t j);
 size_t gfield_sub(GField *f, size_t i, size_t j);
 size_t gfield_mul(GField *f, size_t i, size_t j);
+size_t gfield_div(GField *f, size_t i, size_t j);
 
 #define GF_H_INCLUDED
 #endif
@@ -334,11 +335,11 @@ gf_poly_find_irreducible(GfPoly *res, size_t n, size_t power, GfMod mod)
 	int found = 0;
 	GfPoly ip = {0}, jp = {0};
 	char *factored = calloc(1, n*n);
-	size_t last = n * mod.mod;
+	size_t i, j, last = n * mod.mod;
 
-	for (size_t i = 1; i <= n; ++i) {
+	for (i = 1; i <= n; ++i) {
 		gf_poly_from_index(&ip, i, mod);
-		for (size_t j = i; j <= n; ++j) {
+		for (j = i; j <= n; ++j) {
 			gf_poly_from_index(&jp, j, mod);
 			gf_poly_mul_full(res, ip, jp);
 			gf_poly_mod(res, mod);
@@ -346,7 +347,7 @@ gf_poly_find_irreducible(GfPoly *res, size_t n, size_t power, GfMod mod)
 		}
 	}
 
-	for (size_t i = n; i < last; ++i) {
+	for (i = n; i < last; ++i) {
 		if (!factored[i]) {
 			gf_poly_from_index(res, i, mod);
 			assert(res->len == power + 1);
@@ -424,6 +425,24 @@ gfield_mul(GField *f, size_t i, size_t j)
 	gf_poly_mul(&f->tmp3, f->tmp1, f->tmp2, f->irreducible, f->mod, f->div_tbl);
 	gf_poly_mod(&f->tmp3, f->mod);
 	return gf_poly_to_index(f->tmp3, f->mod);
+}
+
+size_t
+gfield_div(GField *f, size_t i, size_t j)
+{
+	i %= f->n; j %= f->n;
+	gf_poly_from_index(&f->tmp1, j, f->mod);
+	for (size_t k = 0; k < f->n; ++k) {
+		size_t res;
+		gf_poly_from_index(&f->tmp2, k, f->mod);
+		gf_poly_mul(&f->tmp3, f->tmp1, f->tmp2, f->irreducible, f->mod, f->div_tbl);
+		gf_poly_mod(&f->tmp3, f->mod);
+		res = gf_poly_to_index(f->tmp3, f->mod);
+		if (res == i)
+			return k;
+	}
+	assert(0);
+	return 0;
 }
 
 #undef GF_IMPLEMENT

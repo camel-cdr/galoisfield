@@ -12,9 +12,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->input->setValidator(new QIntValidator(0, 99999, this));
+
     ui->opCombo->addItem("+");
     ui->opCombo->addItem("-");
     ui->opCombo->addItem("*");
+    ui->opCombo->addItem("/");
 
     ui->additionTable->setModel(modelAdd);
     ui->additionTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -53,8 +56,22 @@ void MainWindow::updateField(unsigned n, GfPoly *irreducible)
     ui->calcBox->setTitle(QString("Calculate with GF(") + QString::number(field.n) + "=" + QString::number(field.mod.mod) + "^" + QString::number(field.power) + "):");
 
 
-    ui->additionTable->horizontalHeader()->setDefaultSectionSize(ui->additionTable->horizontalHeader()->fontMetrics().horizontalAdvance(QString::number((n-1)*10)));
-    ui->multiplicationTable->horizontalHeader()->setDefaultSectionSize(ui->multiplicationTable->horizontalHeader()->fontMetrics().horizontalAdvance(QString::number((n-1)*10)));
+    ui->additionTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->multiplicationTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    {
+        ui->label_2->setText(QString::number(std::floor(std::log10(n - 1)) + 2));
+
+        auto width = ui->additionTable->horizontalHeader()->fontMetrics().averageCharWidth() * std::floor(std::log10(n - 1) + 3);
+        ui->additionTable->horizontalHeader()->setMaximumSectionSize(width);
+        ui->additionTable->horizontalHeader()->setMinimumSectionSize(width);
+        ui->additionTable->horizontalHeader()->setDefaultSectionSize(width);
+    }
+    {
+        auto width = ui->multiplicationTable->horizontalHeader()->fontMetrics().averageCharWidth() * std::floor(std::log10(n - 1) + 3);
+        ui->multiplicationTable->horizontalHeader()->setMaximumSectionSize(width);
+        ui->multiplicationTable->horizontalHeader()->setMinimumSectionSize(width);
+        ui->multiplicationTable->horizontalHeader()->setDefaultSectionSize(width);
+    }
     ui->additionTable->verticalHeader()->setDefaultSectionSize(QApplication::font().pointSize());
     ui->multiplicationTable->verticalHeader()->setDefaultSectionSize(QApplication::font().pointSize());
 
@@ -157,6 +174,9 @@ void MainWindow::on_calcButton_clicked()
         break;
     case '*':
         res = gfield_mul(&field, l, r);
+        break;
+    case '/':
+        res = gfield_div(&field, l, r);
         break;
     default:
         return;

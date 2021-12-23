@@ -1,10 +1,10 @@
 #include "gfmodel.h"
-#include <QFont>
 #include <unistd.h>
 
 GFModel::GFModel(size_t (*op)(GField *f, size_t i, size_t j), GField *field)
     : op(op)
     , field(field)
+    , font("monospace")
 {
 }
 
@@ -50,6 +50,8 @@ QVariant GFModel::data(const QModelIndex &index, int role) const
         return QVariant((unsigned)op(field, index.column(), index.row()));
     case Qt::TextAlignmentRole:
         return Qt::AlignCenter;
+    case Qt::FontRole:
+        return font;
     default:
         return QVariant();
     }
@@ -62,6 +64,8 @@ QVariant GFModel::headerData(int section, Qt::Orientation orientation, int role)
         return QVariant(section);
     case Qt::TextAlignmentRole:
         return Qt::AlignCenter;
+    case Qt::FontRole:
+        return font;
     default:
         return QVariant();
     }
