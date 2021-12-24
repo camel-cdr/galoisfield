@@ -66,7 +66,7 @@ size_t gfield_div(GField *f, size_t i, size_t j);
 #define GF_H_INCLUDED
 #endif
 
-#ifdef GF_IMPLEMENT
+#ifdef GF_IMPLEMENTATION
 
 #include <assert.h>
 #include <math.h>
@@ -430,9 +430,10 @@ gfield_mul(GField *f, size_t i, size_t j)
 size_t
 gfield_div(GField *f, size_t i, size_t j)
 {
+	size_t k;
 	i %= f->n; j %= f->n;
 	gf_poly_from_index(&f->tmp1, j, f->mod);
-	for (size_t k = 0; k < f->n; ++k) {
+	for (k = 0; k < f->n; ++k) {
 		size_t res;
 		gf_poly_from_index(&f->tmp2, k, f->mod);
 		gf_poly_mul(&f->tmp3, f->tmp1, f->tmp2, f->irreducible, f->mod, f->div_tbl);
@@ -445,5 +446,5 @@ gfield_div(GField *f, size_t i, size_t j)
 	return 0;
 }
 
-#undef GF_IMPLEMENT
+#undef GF_IMPLEMENTATION
 #endif

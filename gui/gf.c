@@ -1,2 +1,2 @@
-#define GF_IMPLEMENT
+#define GF_IMPLEMENTATION
 #include "../gf.h"

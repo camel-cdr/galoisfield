@@ -4,8 +4,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-QMAKE_CFLAGS_RELEASE = -Ofast -march=native -DNDEBUG
-QMAKE_CXXFLAGS_RELEASE = -Ofast -march=native -DNDEBUG
+QMAKE_CFLAGS_RELEASE = -O3 -DNDEBUG
+QMAKE_CXXFLAGS_RELEASE = -O3 -DNDEBUG
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

@@ -30,7 +30,7 @@
        </size>
       </property>
       <property name="title">
-       <string>Input</string>
+       <string>Input:</string>
       </property>
       <widget class="QLabel" name="irreducibleLable">
        <property name="enabled">
@@ -57,9 +57,9 @@
       <widget class="QLineEdit" name="input">
        <property name="geometry">
         <rect>
-         <x>34</x>
+         <x>43</x>
          <y>30</y>
-         <width>170</width>
+         <width>161</width>
          <height>23</height>
         </rect>
        </property>
@@ -136,9 +136,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>80</x>
+         <x>89</x>
          <y>60</y>
-         <width>160</width>
+         <width>151</width>
          <height>23</height>
         </rect>
        </property>
@@ -254,6 +254,12 @@
           </property>
           <property name="text">
            <string>=</string>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
          <widget class="QLabel" name="calcOutput">

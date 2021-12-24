@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QInputDialog>
+#include <math.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -11,8 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     , modelMul(new GFModel(gfield_mul))
 {
     ui->setupUi(this);
-
-    ui->input->setValidator(new QIntValidator(0, 99999, this));
+    ui->input->setValidator(new QIntValidator(0, 9999999, this));
 
     ui->opCombo->addItem("+");
     ui->opCombo->addItem("-");
@@ -59,15 +59,13 @@ void MainWindow::updateField(unsigned n, GfPoly *irreducible)
     ui->additionTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->multiplicationTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     {
-        ui->label_2->setText(QString::number(std::floor(std::log10(n - 1)) + 2));
-
-        auto width = ui->additionTable->horizontalHeader()->fontMetrics().averageCharWidth() * std::floor(std::log10(n - 1) + 3);
+        auto width = ui->additionTable->horizontalHeader()->fontMetrics().averageCharWidth() * ceil(log10(n - 1) + 3);
         ui->additionTable->horizontalHeader()->setMaximumSectionSize(width);
         ui->additionTable->horizontalHeader()->setMinimumSectionSize(width);
         ui->additionTable->horizontalHeader()->setDefaultSectionSize(width);
     }
     {
-        auto width = ui->multiplicationTable->horizontalHeader()->fontMetrics().averageCharWidth() * std::floor(std::log10(n - 1) + 3);
+        auto width = ui->multiplicationTable->horizontalHeader()->fontMetrics().averageCharWidth() * ceil(log10(n - 1) + 3);
         ui->multiplicationTable->horizontalHeader()->setMaximumSectionSize(width);
         ui->multiplicationTable->horizontalHeader()->setMinimumSectionSize(width);
         ui->multiplicationTable->horizontalHeader()->setDefaultSectionSize(width);
