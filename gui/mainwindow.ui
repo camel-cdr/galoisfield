@@ -25,7 +25,7 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>300</width>
+        <width>350</width>
         <height>100</height>
        </size>
       </property>
@@ -57,9 +57,9 @@
       <widget class="QLineEdit" name="input">
        <property name="geometry">
         <rect>
-         <x>43</x>
+         <x>45</x>
          <y>30</y>
-         <width>161</width>
+         <width>215</width>
          <height>23</height>
         </rect>
        </property>
@@ -69,14 +69,17 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font/>
+       </property>
       </widget>
-      <widget class="QPushButton" name="irreducibleButton">
+      <widget class="QPushButton" name="editButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="geometry">
         <rect>
-         <x>250</x>
+         <x>300</x>
          <y>60</y>
          <width>40</width>
          <height>23</height>
@@ -92,12 +95,12 @@
         <string>Edit</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="updateButton">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>32</y>
-         <width>80</width>
+         <x>269</x>
+         <y>30</y>
+         <width>71</width>
          <height>23</height>
         </rect>
        </property>
@@ -111,7 +114,7 @@
         <string>Update</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="inputLable">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -136,9 +139,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>89</x>
+         <x>90</x>
          <y>60</y>
-         <width>151</width>
+         <width>200</width>
          <height>23</height>
         </rect>
        </property>
@@ -147,6 +150,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="font">
+        <font/>
        </property>
        <property name="text">
         <string/>
@@ -183,6 +189,9 @@
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
         <widget class="QLineEdit" name="calcLhs">
+         <property name="font">
+          <font/>
+         </property>
          <property name="toolTip">
           <string>Enter an expression with + - * / operators</string>
          </property>
@@ -214,10 +223,16 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font/>
+         </property>
         </widget>
        </item>
        <item row="0" column="2">
         <widget class="QLineEdit" name="calcRhs">
+         <property name="font">
+          <font/>
+         </property>
          <property name="toolTip">
           <string>Enter an expression with + - * / operators</string>
          </property>
@@ -251,6 +266,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font/>
           </property>
           <property name="text">
            <string>=</string>
@@ -360,9 +378,9 @@
  </widget>
  <tabstops>
   <tabstop>input</tabstop>
-  <tabstop>pushButton</tabstop>
+  <tabstop>updateButton</tabstop>
   <tabstop>irreducibleLine</tabstop>
-  <tabstop>irreducibleButton</tabstop>
+  <tabstop>editButton</tabstop>
   <tabstop>additionTable</tabstop>
   <tabstop>multiplicationTable</tabstop>
   <tabstop>tabWidget</tabstop>

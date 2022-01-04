@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QInputDialog>
-#include <math.h>
+#include <cmath>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -33,9 +33,45 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::updateField(unsigned n, GfPoly *irreducible)
+
+void MainWindow::setEditMode(bool edit)
 {
+    editMode = edit;
+    ui->input->setDisabled(edit);
+    ui->editButton->setDisabled(edit);
+    ui->calcBox->setDisabled(edit);
+    ui->tabWidget->setDisabled(edit);
+    ui->irreducibleLine->setEnabled(true);
+    ui->irreducibleLine->setReadOnly(!edit);
+    ui->irreducibleLine->setFocus();
+    ui->irreducibleLine->setSelection(0, ui->irreducibleLine->text().length());
+}
+
+void MainWindow::updateField(GfPoly *irreducible)
+{
+    unsigned n;
+    if (!stringToInt(ui->input->displayText(), &n)) {
+        ui->input->setText(QString::number(field.n));
+        return;
+    }
+
+
+    size_t mod = 0, power = 0;
+    if (!gf_factor(n, &mod, &power)) {
+        QMessageBox::warning(this, "Invalid input", QString("GF(%1) doesn't exist").arg(n));
+        return;
+    }
+
+    if (n > 10000 && !editMode) {
+        setEditMode(true);
+        return;
+    }
+
+
     auto res = gfield_init(&field, n, irreducible);
+
+    /* setup the GUI */
+
     if (res != GF_INIT_SUCCESS) {
         if (res == GF_INIT_DOESNT_EXIST)
             QMessageBox::warning(this, "Invalid input", QString("GF(%1) doesn't exist").arg(n));
@@ -44,12 +80,16 @@ void MainWindow::updateField(unsigned n, GfPoly *irreducible)
         else
             QMessageBox::warning(this, "Invalid input", QString("GF(%1) isn't supported, because it's to big").arg(n));
         ui->input->setText(QString::number(field.n));
+        ui->input->setFocus();
+        ui->input->setSelection(0, ui->input->text().length());
         return;
     }
 
+    setEditMode(false);
+
     ui->irreducibleLine->setText(polyToString(field.irreducible));
 
-    ui->irreducibleButton->setEnabled(true);
+    ui->editButton->setEnabled(true);
     ui->irreducibleLable->setEnabled(true);
     ui->irreducibleLine->setEnabled(true);
     ui->calcBox->setEnabled(true);
@@ -81,9 +121,9 @@ QString MainWindow::polyToString(GfPoly p)
 {
     if (p.len == 0)
         return "0";
-    QString str = QString("%1").arg(p.at[p.len - 1]);
+    QString str = QString::number(p.at[p.len - 1]);
     for (size_t i = p.len - 1; i--; )
-        str += QString(" %1").arg(p.at[i]);
+        str += " " + QString::number(p.at[i]);
     return str;
 }
 
@@ -99,58 +139,37 @@ bool MainWindow::stringToInt(QString str, unsigned *x)
     return true;
 }
 
-bool MainWindow::editIrreducible(unsigned n, QString msg, QString defaultVal)
+void MainWindow::on_updateButton_clicked()
 {
-    GfPoly p = {};
-    bool ok;
-    QString text = QInputDialog::getText(this, "Input Irreducible Polynomial",
-                                         msg,
-                                         QLineEdit::Normal, defaultVal, &ok);
-    if (!ok || text.isEmpty())
-        goto err;
-
-    {
-        auto arr = text.trimmed().split(" ");
+    if (editMode) {
+        bool ok;
+        GfPoly p = {0};
+        const auto arr = ui->irreducibleLine->text().split(" ", Qt::SkipEmptyParts);
         gf_poly_setlen(&p, arr.length());
-        size_t i = arr.length() - 1;
-        for (auto x : arr) {
-            unsigned n = x.toUInt(&ok);
+
+        for (auto i = arr.length(); i--; ) {
+            p.at[i] = arr[arr.length() - i - 1].toUInt(&ok);
             if  (!ok) {
-                goto err;
+                gf_poly_free(&p);
+                QMessageBox::warning(
+                            this,
+                            "Invalid input",
+                            "Polynomial couldn't be parsed, "
+                            "expected space seperated multiplicands");
+                return;
             }
-            p.at[i--] = n;
         }
-    }
 
-    updateField(n, &p);
-    gf_poly_free(&p);
-    return true;
-
-err:
-    gf_poly_free(&p);
-    QMessageBox::warning(this, "Invalid input", "Polynomial couldn't be parsed, expected space seperated multiplicands");
-    return false;
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    unsigned n;
-    if (!stringToInt(ui->input->displayText(), &n)) {
-        ui->input->setText(QString::number(field.n));
-        return;
-    }
-
-    if (n > 10000) {
-        if (!editIrreducible(n, "Input Irreducible Polynomial, since calculating it would take to long:", ""))
-            ui->input->setText(QString::number(field.n));
+        updateField(&p);
+        gf_poly_free(&p);
     } else {
-        updateField(n, nullptr);
+        updateField();
     }
 }
 
-void MainWindow::on_irreducibleButton_clicked()
+void MainWindow::on_editButton_clicked()
 {
-    editIrreducible(field.n, "Input Irreducible Polynomial", ui->irreducibleLine->text());
+    setEditMode(true);
 }
 
 
@@ -164,21 +183,11 @@ void MainWindow::on_calcButton_clicked()
         return;
 
     switch (ui->opCombo->currentText()[0].toLatin1()) {
-    case '+':
-        res = gfield_add(&field, l, r);
-        break;
-    case '-':
-        res = gfield_sub(&field, l, r);
-        break;
-    case '*':
-        res = gfield_mul(&field, l, r);
-        break;
-    case '/':
-        res = gfield_div(&field, l, r);
-        break;
-    default:
-        return;
+    case '+': res = gfield_add(&field, l, r); break;
+    case '-': res = gfield_sub(&field, l, r); break;
+    case '*': res = gfield_mul(&field, l, r); break;
+    case '/': res = gfield_div(&field, l, r); break;
+    default: return;
     }
     ui->calcOutput->setText(QString::number(res));
 }
-

@@ -18,22 +18,20 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void updateField(unsigned n, GfPoly *irreducible);
-
-
 private:
+    void setEditMode(bool edit);
+    void updateField(GfPoly *irreducible = nullptr);
     static QString polyToString(GfPoly p);
     bool stringToInt(QString str, unsigned *x);
-    bool editIrreducible(unsigned n, QString msg, QString defaultVale);
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_irreducibleButton_clicked();
-
+    void on_updateButton_clicked();
+    void on_editButton_clicked();
     void on_calcButton_clicked();
 
 private:
+    bool editMode = false;
+
     Ui::MainWindow *ui;
     GFModel *modelAdd;
     GFModel *modelMul;
