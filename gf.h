@@ -7,8 +7,7 @@
 int gf_is_prime(size_t n);
 int gf_factor(size_t n, size_t *mod, size_t *power);
 
-/* Based on: https://lemire.me/blog/2019/02/08/faster-remainders-when-the-
- *           divisor-is-a-constant-beating-compilers-and-libdivide/ */
+/* Based on: https://arxiv.org/abs/1902.01961 */
 typedef struct {
 	uint32_t c;
 	uint16_t mod; /* is assumed to be prime */
@@ -88,12 +87,12 @@ gf_is_prime(size_t n)
 int
 gf_factor(size_t n, size_t *mod, size_t *power)
 {
-	size_t m, p, end = sqrt(n) + 1;
+	size_t m, p, end;
 
 	if (n < 2)
 		return 0;
 
-	for (m = 2, p = 0; m < end; ++m) {
+	for (m = 2, p = 0, end = sqrt(n) + 1; m < end; ++m) {
 		if (n % m == 0) {
 			do {
 				n /= m;
@@ -105,12 +104,14 @@ gf_factor(size_t n, size_t *mod, size_t *power)
 
 	/* n must be prime */
 	if (m == end) {
+		assert(gf_is_prime(n));
 		*mod = n;
 		*power = 1;
 		return 1;
 	}
 
-	if (!gf_is_prime(m) || (p != 0 && n != 1))
+	/* GF(n) doesn't exist if m didn't fully divide n */
+	if (p != 0 && n != 1)
 		return 0;
 
 	*mod = m;
@@ -124,9 +125,6 @@ GfMod
 gf_mod_create(uint16_t mod)
 {
 	GfMod res;
-#ifndef NDEBUG
-	assert(gf_is_prime(mod));
-#endif
 	res.mod = mod;
 	res.c = ~UINT32_C(0) / mod + 1;
 	return res;
@@ -278,7 +276,7 @@ gf_poly_mul(GfPoly *res, GfPoly p1, GfPoly p2, GfPoly polyMod, GfMod mod, uint16
 	gf_poly_mul_full(res, p1, p2);
 	gf_poly_shrink_mod(res, mod);
 
-	/* division using the school method */
+	/* calc remainder using using the school method for division */
 	while (res->len >= polyMod.len) {
 		size_t i, j;
 		const uint16_t mul = res->at[res->len-1] *
@@ -317,6 +315,7 @@ gf_poly_from_index(GfPoly *res, size_t index, GfMod mod)
 	gf_poly_shrink(res);
 }
 
+/******************************************************************************/
 
 GFieldInitStatus
 gfield_init(GField *f, size_t n, GfPoly *irreducible)
@@ -408,7 +407,7 @@ gfield_div(GField *f, size_t i, size_t j)
 		if (res == i)
 			return k;
 	}
-	assert(0);
+	assert(0); /* no result, this shouldn't happen */
 	return 0;
 }
 
