@@ -8,8 +8,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , modelAdd(new GFModel(gfield_add))
-    , modelMul(new GFModel(gfield_mul))
+    , modelAdd(new GFModel(gfield_add, "+"))
+    , modelMul(new GFModel(gfield_mul, "*"))
 {
     ui->setupUi(this);
     ui->input->setValidator(new QIntValidator(0, 9999999, this));

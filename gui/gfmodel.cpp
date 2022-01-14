@@ -1,8 +1,9 @@
 #include "gfmodel.h"
 #include <unistd.h>
 
-GFModel::GFModel(size_t (*op)(GField *f, size_t i, size_t j), GField *field)
+GFModel::GFModel(size_t (*op)(GField *f, size_t i, size_t j), QString opStr, GField *field)
     : op(op)
+    , opStr(opStr)
     , field(field)
     , font("monospace")
 {

@@ -12,9 +12,10 @@ extern "C" {
 class GFModel : public QAbstractItemModel
 {
 public:
-    explicit GFModel(size_t (*op)(GField *f, size_t i, size_t j), GField *field = nullptr);
+    explicit GFModel(size_t (*op)(GField *f, size_t i, size_t j), QString opStr, GField *field = nullptr);
     void setField(GField *field);
 
+    QString opStr;
     size_t (*op)(GField *f, size_t i, size_t j);
     GField *field;
     QFont font;

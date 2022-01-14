@@ -32,10 +32,11 @@ void GFView::selectionChanged(const QItemSelection &selected, const QItemSelecti
     if (selected.count() != 1)
         return;
     auto sel = selected.indexes()[0];
+    str += "(";
     str += gfmodel->polyIndexToString(sel.row());
-    str += " + ";
+    str += ") " + gfmodel->opStr + " (";
     str += gfmodel->polyIndexToString(sel.column());
-    str += " = ";
+    str += ") = ";
     str += gfmodel->polyIndexToString(sel.data().toUInt());
     lbl->setText(str);
 }
