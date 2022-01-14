@@ -15,6 +15,41 @@ void GFModel::setField(GField *field)
     endResetModel();
 }
 
+QString GFModel::polyIndexToString(size_t index)
+{
+    GfPoly *p = &field->tmp1;
+    gf_poly_from_index(p, index, field->mod);
+
+    if (index == 0)
+        return "0";
+
+    bool first = true;
+    size_t i = p->len;
+    QString str;
+
+    while (i--) {
+        auto n = p->at[i];
+
+        if (n > 0) {
+            if (!first)
+                str += '+';
+            if (n != 1 || i == 0)
+                str += QString::number(n);
+        } else {
+            continue;
+        }
+
+        if (i == 1)
+            str += 'x';
+        else if (i != 0)
+            str += "x^" + QString::number(i);
+
+        first = false;
+    }
+
+    return str;
+}
+
 QModelIndex GFModel::index(int row, int column, const QModelIndex &parent) const
 {
     return createIndex(row, column, nullptr);

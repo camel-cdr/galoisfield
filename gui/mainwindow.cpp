@@ -19,13 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->opCombo->addItem("*");
     ui->opCombo->addItem("/");
 
-    ui->additionTable->setModel(modelAdd);
-    ui->additionTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->additionTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    ui->multiplicationTable->setModel(modelMul);
-    ui->multiplicationTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->multiplicationTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->additionTable->init(modelAdd, ui->descriptionLabel);
+    ui->multiplicationTable->init(modelMul, ui->descriptionLabel);
 }
 
 MainWindow::~MainWindow()
@@ -90,28 +85,13 @@ void MainWindow::updateField(GfPoly *irreducible)
     ui->irreducibleLine->setText(polyToString(field.irreducible));
 
     ui->editButton->setEnabled(true);
-    ui->irreducibleLable->setEnabled(true);
+    ui->irreducibleLabel->setEnabled(true);
     ui->irreducibleLine->setEnabled(true);
     ui->calcBox->setEnabled(true);
     ui->calcBox->setTitle(QString("Calculate with GF(") + QString::number(field.n) + "=" + QString::number(field.mod.mod) + "^" + QString::number(field.power) + "):");
 
-
-    ui->additionTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->multiplicationTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    {
-        auto width = ui->additionTable->horizontalHeader()->fontMetrics().averageCharWidth() * ceil(log10(n - 1) + 3);
-        ui->additionTable->horizontalHeader()->setMaximumSectionSize(width);
-        ui->additionTable->horizontalHeader()->setMinimumSectionSize(width);
-        ui->additionTable->horizontalHeader()->setDefaultSectionSize(width);
-    }
-    {
-        auto width = ui->multiplicationTable->horizontalHeader()->fontMetrics().averageCharWidth() * ceil(log10(n - 1) + 3);
-        ui->multiplicationTable->horizontalHeader()->setMaximumSectionSize(width);
-        ui->multiplicationTable->horizontalHeader()->setMinimumSectionSize(width);
-        ui->multiplicationTable->horizontalHeader()->setDefaultSectionSize(width);
-    }
-    ui->additionTable->verticalHeader()->setDefaultSectionSize(QApplication::font().pointSize());
-    ui->multiplicationTable->verticalHeader()->setDefaultSectionSize(QApplication::font().pointSize());
+    ui->additionTable->setWidth(ceil(log10(n - 1) + 3));
+    ui->multiplicationTable->setWidth(ceil(log10(n - 1) + 3));
 
     modelAdd->setField(&field);
     modelMul->setField(&field);

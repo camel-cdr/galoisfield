@@ -14,11 +14,13 @@ QMAKE_CXXFLAGS_RELEASE = -O3 -DNDEBUG
 SOURCES += \
     gf.c \
     gfmodel.cpp \
+    gfview.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     gfmodel.h \
+    gfview.h \
     mainwindow.h
 
 FORMS += \

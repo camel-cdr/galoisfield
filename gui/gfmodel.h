@@ -15,7 +15,6 @@ public:
     explicit GFModel(size_t (*op)(GField *f, size_t i, size_t j), GField *field = nullptr);
     void setField(GField *field);
 
-private:
     size_t (*op)(GField *f, size_t i, size_t j);
     GField *field;
     QFont font;
@@ -23,6 +22,7 @@ private:
 
     // QAbstractItemModel interface
 public:
+    QString polyIndexToString(size_t index);
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex parent(const QModelIndex &child) const;
     int rowCount(const QModelIndex &parent) const;

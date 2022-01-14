@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTableView>
 #include "gfmodel.h"
+#include "gfview.h"
 
 
 QT_BEGIN_NAMESPACE
