@@ -9,15 +9,12 @@ Check out the [web-demo](https://camel-cdr.github.io/web-demos/galoisfield/gui.h
 
 ## Compile
 
-The easies way to compile this is by opening the [gui/gui.pro](gui/gui.pro) with qtcreator.
-
-### With qmake
-
 ```sh
-qmake . CONFIG+=release
-make -j
+cd gui && qmake . CONFIG+=release && make -j
 ```
 
+Or open [gui/gui.pro](gui/gui.pro) with qtcreator.
+
 # Licensing
-MIT or public domain, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
 

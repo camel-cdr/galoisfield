@@ -139,9 +139,9 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>90</x>
+         <x>109</x>
          <y>60</y>
-         <width>200</width>
+         <width>181</width>
          <height>23</height>
         </rect>
        </property>
@@ -153,6 +153,9 @@
        </property>
        <property name="font">
         <font/>
+       </property>
+       <property name="toolTip">
+        <string>Enter the factors of an irreducible Polynomial (e.g.&quot;1 0 1 1&quot;)</string>
        </property>
        <property name="text">
         <string/>
@@ -307,7 +310,7 @@
     <item row="1" column="0" colspan="2">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="additionTab">
        <attribute name="title">

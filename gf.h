@@ -1,6 +1,7 @@
 #ifndef GF_H_INCLUDED
 
 #include <inttypes.h>
+#include <assert.h>
 #include <stddef.h>
 
 int gf_is_prime(size_t n);
@@ -34,7 +35,6 @@ void gf_poly_mod(GfPoly *poly, GfMod mod);
 void gf_poly_neg(GfPoly *poly, GfMod mod);
 void gf_poly_add(GfPoly *res, GfPoly poly1, GfPoly poly2);
 void gf_poly_mul_full(GfPoly *res, GfPoly p1, GfPoly p2);
-void gf_poly_div(GfPoly *res, GfPoly poly, GfMod mod, uint16_t *div_tbl);
 void gf_poly_mul(GfPoly *res, GfPoly p1, GfPoly p2, GfPoly polyMod, GfMod mod, uint16_t *div_tbl);
 size_t gf_poly_to_index(GfPoly poly, GfMod mod);
 void gf_poly_from_index(GfPoly *res, size_t index, GfMod mod);
@@ -51,12 +51,12 @@ typedef enum {
 	GF_INIT_SUCCESS,
 	GF_INIT_DOESNT_EXIST,
 	GF_INIT_MOD_TO_BIG,
-	GF_INIT_IRREDUCIBLE_IS_ZERO
+	GF_INIT_IRREDUCIBLE_INVALID
 } GFieldInitStatus;
 
 
-void gfield_free(GField *f);
 GFieldInitStatus gfield_init(GField *f, size_t n, GfPoly *irreducible);
+void gfield_free(GField *f);
 
 size_t gfield_add(GField *f, size_t i, size_t j);
 size_t gfield_sub(GField *f, size_t i, size_t j);
@@ -103,7 +103,7 @@ gf_factor(size_t n, size_t *mod, size_t *power)
 		}
 	}
 
-	/* n is prime */
+	/* n must be prime */
 	if (m == end) {
 		*mod = n;
 		*power = 1;
@@ -118,6 +118,7 @@ gf_factor(size_t n, size_t *mod, size_t *power)
 	return 1;
 }
 
+/******************************************************************************/
 
 GfMod
 gf_mod_create(uint16_t mod)
@@ -147,9 +148,10 @@ gf_mod_neg(GfMod mod, uint16_t x)
 	return mod.mod - gf_mod(mod, x);
 }
 
+/******************************************************************************/
 
-
-/* output should have mod elements */
+/* output: should have mod.mod elements
+ * mod: mod.mod should be >= 2 */
 void
 gf_gen_div_tbl(uint16_t *output, GfMod mod)
 {
@@ -160,7 +162,7 @@ gf_gen_div_tbl(uint16_t *output, GfMod mod)
 		            gf_mod(mod, mod.mod - mod.mod / i);
 }
 
-
+/******************************************************************************/
 
 void
 gf_poly_setlen(GfPoly *poly, size_t len)
@@ -271,27 +273,24 @@ gf_poly_mul_full(GfPoly *res, GfPoly p1, GfPoly p2)
 
 
 void
-gf_poly_div(GfPoly *res, GfPoly poly, GfMod mod, uint16_t *div_tbl)
-{
-	size_t i, j;
-	while (res->len >= poly.len) {
-		const uint16_t mul = res->at[res->len-1] *
-		                     div_tbl[gf_mod(mod,poly.at[poly.len - 1])];
-
-		for (i = res->len, j = poly.len; i--, j--;)
-			res->at[i] = res->at[i] + gf_mod_neg(mod, poly.at[j] * mul);
-
-		--res->len; /* the degree will always be reduced by one */
-		gf_poly_shrink_mod(res, mod);
-	}
-}
-
-void
 gf_poly_mul(GfPoly *res, GfPoly p1, GfPoly p2, GfPoly polyMod, GfMod mod, uint16_t *div_tbl)
 {
 	gf_poly_mul_full(res, p1, p2);
 	gf_poly_shrink_mod(res, mod);
-	gf_poly_div(res, polyMod, mod, div_tbl);
+
+	/* division using the school method */
+	while (res->len >= polyMod.len) {
+		size_t i, j;
+		const uint16_t mul = res->at[res->len-1] *
+		                     div_tbl[gf_mod(mod,polyMod.at[polyMod.len - 1])];
+
+		for (i = res->len, j = polyMod.len; i--, j--;)
+			res->at[i] = res->at[i] + gf_mod_neg(mod, polyMod.at[j] * mul);
+
+		/* the degree will always be reduced by at least one */
+		--res->len;
+		gf_poly_shrink_mod(res, mod);
+	}
 }
 
 
@@ -319,50 +318,6 @@ gf_poly_from_index(GfPoly *res, size_t index, GfMod mod)
 }
 
 
-void
-gfield_free(GField *f)
-{
-	gf_poly_free(&f->irreducible);
-	gf_poly_free(&f->tmp1);
-	gf_poly_free(&f->tmp2);
-	gf_poly_free(&f->tmp3);
-	free(f->div_tbl);
-}
-
-static int
-gf_poly_find_irreducible(GfPoly *res, size_t n, size_t power, GfMod mod)
-{
-	int found = 0;
-	GfPoly ip = {0}, jp = {0};
-	char *factored = calloc(1, n*n);
-	size_t i, j, last = n * mod.mod;
-
-	for (i = 1; i <= n; ++i) {
-		gf_poly_from_index(&ip, i, mod);
-		for (j = i; j <= n; ++j) {
-			gf_poly_from_index(&jp, j, mod);
-			gf_poly_mul_full(res, ip, jp);
-			gf_poly_mod(res, mod);
-			factored[gf_poly_to_index(*res, mod)] = 1;
-		}
-	}
-
-	for (i = n; i < last; ++i) {
-		if (!factored[i]) {
-			gf_poly_from_index(res, i, mod);
-			assert(res->len == power + 1);
-			found = 1;
-			break;
-		}
-	}
-
-	gf_poly_free(&ip);
-	gf_poly_free(&jp);
-	free(factored);
-
-	return found;
-}
-
 GFieldInitStatus
 gfield_init(GField *f, size_t n, GfPoly *irreducible)
 {
@@ -377,20 +332,31 @@ gfield_init(GField *f, size_t n, GfPoly *irreducible)
 	f->n = n;
 	f->power = power;
 	f->mod = gf_mod_create(mod);
-	f->div_tbl = realloc(f->div_tbl, mod * sizeof *f->div_tbl);
 
-	gf_gen_div_tbl(f->div_tbl, f->mod);
-	if (irreducible) {
-		gf_poly_mod(irreducible, f->mod);
-        if (irreducible->len == 0)
-			return GF_INIT_IRREDUCIBLE_IS_ZERO;
-		gf_poly_copy(&f->irreducible, *irreducible);
-		gf_poly_mod(&f->irreducible, f->mod);
-	} else {
-		gf_poly_find_irreducible(&f->irreducible, n, power, f->mod);
+	if (!irreducible) {
+		return GF_INIT_IRREDUCIBLE_INVALID;
 	}
+	gf_poly_mod(irreducible, f->mod);
+	if (irreducible->len == 0) {
+		return GF_INIT_IRREDUCIBLE_INVALID;
+	}
+	gf_poly_copy(&f->irreducible, *irreducible);
+	gf_poly_mod(&f->irreducible, f->mod);
+
+	f->div_tbl = realloc(f->div_tbl, mod * sizeof *f->div_tbl);
+	gf_gen_div_tbl(f->div_tbl, f->mod);
 
 	return GF_INIT_SUCCESS;
+}
+
+void
+gfield_free(GField *f)
+{
+	gf_poly_free(&f->irreducible);
+	gf_poly_free(&f->tmp1);
+	gf_poly_free(&f->tmp2);
+	gf_poly_free(&f->tmp3);
+	free(f->div_tbl);
 }
 
 size_t

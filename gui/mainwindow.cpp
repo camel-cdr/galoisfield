@@ -62,7 +62,7 @@ void MainWindow::updateField(GfPoly *irreducible)
         return;
     }
 
-    if (n > 10000 && !editMode) {
+    if (/* n > 10000 && */ !editMode) {
         setEditMode(true);
         return;
     }
@@ -75,8 +75,8 @@ void MainWindow::updateField(GfPoly *irreducible)
     if (res != GF_INIT_SUCCESS) {
         if (res == GF_INIT_DOESNT_EXIST)
             QMessageBox::warning(this, "Invalid input", QString("GF(%1) doesn't exist").arg(n));
-        else if (res == GF_INIT_IRREDUCIBLE_IS_ZERO)
-            QMessageBox::warning(this, "Invalid input", QString("The irreducible polynomial can't be zero").arg(n));
+        else if (res == GF_INIT_IRREDUCIBLE_INVALID)
+            QMessageBox::warning(this, "Invalid input", QString("The irreducible polynomial is invalid, make sure it isn't zero").arg(n));
         else
             QMessageBox::warning(this, "Invalid input", QString("GF(%1) isn't supported, because it's to big").arg(n));
         ui->input->setText(QString::number(field.n));
@@ -143,7 +143,7 @@ void MainWindow::on_updateButton_clicked()
 {
     if (editMode) {
         bool ok;
-        GfPoly p = {0};
+        GfPoly p{};
         const auto arr = ui->irreducibleLine->text().split(" ", Qt::SkipEmptyParts);
         gf_poly_setlen(&p, arr.length());
 
