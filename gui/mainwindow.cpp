@@ -60,13 +60,13 @@ void MainWindow::updateField(GfPoly *irreducible)
     if (/* n > 10000 && */ !editMode) {
         setEditMode(true);
         return;
+    } else {
+        setEditMode(false);
     }
-
 
     auto res = gfield_init(&field, n, irreducible);
 
     /* setup the GUI */
-
     if (res != GF_INIT_SUCCESS) {
         if (res == GF_INIT_DOESNT_EXIST)
             QMessageBox::warning(this, "Invalid input", QString("GF(%1) doesn't exist").arg(n));
@@ -79,8 +79,6 @@ void MainWindow::updateField(GfPoly *irreducible)
         ui->input->setSelection(0, ui->input->text().length());
         return;
     }
-
-    setEditMode(false);
 
     ui->irreducibleLine->setText(polyToString(field.irreducible));
 
